@@ -7,7 +7,7 @@ Visit https://ayanray.github.io/dynamodb-viewer/
 
 Use it! Submit the form fields and connect.
 
-## Running DynamoDB Locally
+## Running dynamodb-local
 
 When you run dynamoDB-local, it does not support HTTPS. So I built a small HTTPS proxy to route traffice to a dynamodb-local instance.
 
