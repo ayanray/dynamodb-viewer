@@ -9,7 +9,7 @@ Use it! Submit the form fields and connect.
 
 ## Running dynamodb-local
 
-When you run dynamoDB-local, it does not support HTTPS. So I built a small HTTPS proxy to route traffice to a dynamodb-local instance.
+When you run [dynamodb-local](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html), it does not support HTTPS. So I made a small HTTPS proxy to route traffic to a dynamodb-local instance.
 
 Read more about it here:
 https://github.com/ayanray/dynamodb-https-proxy
