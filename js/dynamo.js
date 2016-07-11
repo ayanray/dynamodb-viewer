@@ -64,7 +64,6 @@ function populateData(tableName) {
 			});
 		}
 		columns = _.sortBy(columns, function(o) { return o.title; });
-		console.log(columns);
 
 		$('#table').bootstrapTable('destroy');
 		$('#table').bootstrapTable({
