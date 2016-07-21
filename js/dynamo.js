@@ -1,7 +1,44 @@
 var dynamodb = null;
 var table = null;
 
+var settings = ['keyId', 'secret', 'endpoint', 'region'];
+var dynamoDbRegions = [
+	'us-east-1',
+	'us-west-1',
+	'us-west-2',
+	'ap-south-1',
+	'ap-northeast-1',
+	'ap-northeast-2',
+	'ap-southeast-1',
+	'ap-southeast-2',
+	'eu-central-1',
+	'eu-west-1',
+	'sa-east-1'
+];
+
+function populateAwsRegions() {
+	dynamoDbRegions.forEach(function(val) {
+		$('#region').append('<option>' + val + '</option>');
+	});
+}
+
+function loadDefaultSettings() {
+	settings.forEach(function(val) {
+		if (localStorage[val]) {
+			$('#' + val).val(localStorage[val]);
+		}
+	});
+}
+
+function saveSettings() {
+	settings.forEach(function(val) {
+		localStorage[val] = $('#' + val).val();
+	});
+}
+
 $(document).ready(function() {
+	populateAwsRegions();
+	loadDefaultSettings();
 	$('#connect').click(connect);
 	$('#tableSelect').change(function() {
 		populateData($('#tableSelect').val());
@@ -13,6 +50,8 @@ function connect() {
 	var secret = $('#secret').val();
 	var endpoint = $('#endpoint').val();
 	var region = $('#region').val();
+
+	saveSettings();
 
 	console.log('Connecting to ' + endpoint + ' in ' + region);
 	dynamodb = new AWS.DynamoDB({
@@ -48,7 +87,6 @@ function populateData(tableName) {
 		var objs = [];
 		var columns = [];
 		if (data.Items) {
-			var columnsStr = '<tr>';
 			var objId = 0;
 			data.Items.forEach(function(el) {
 				var obj = {};
