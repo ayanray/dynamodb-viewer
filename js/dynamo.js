@@ -87,21 +87,20 @@ function populateData(tableName) {
 		var objs = [];
 		var columns = [];
 		if (data.Items) {
-			var objId = 0;
 			data.Items.forEach(function(el) {
 				var obj = {};
 				for (const i in el) {
 					var cellData = prettyPrint(el[i]);
 					obj[i] = cellData;
-					if (objId === 0) {
-						columns.push({ field: i, title: i });
-					}
+					columns.push({ field: i, title: i });
 				}
-				objId++;
 				objs.push(obj);
 			});
 		}
 		columns = _.sortBy(columns, function(o) { return o.title; });
+		columns = _.uniqBy(columns, function (e) {
+			return e.field;
+		});
 
 		$('#table').bootstrapTable('destroy');
 		$('#table').bootstrapTable({
@@ -117,10 +116,65 @@ function prettyPrint(data) {
 	if (Object.keys(data).length === 1) {
 		for (var i in data) {
 			if (i === 'M') {
-				return JSON.stringify(data);
+				return syntaxHighlight(JSON.stringify(stripJargon(data), undefined, 4));
 			}
 			return data[i];
 		}
 	}
 	return JSON.stringify(data);
+}
+
+function syntaxHighlight(json) {
+	json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+		var cls = 'number';
+		if (/^"/.test(match)) {
+			if (/:$/.test(match)) {
+				cls = 'key';
+			} else {
+				cls = 'string';
+			}
+		} else if (/true|false/.test(match)) {
+			cls = 'boolean';
+		} else if (/null/.test(match)) {
+			cls = 'null';
+		}
+		return '<span class="' + cls + '">' + match + '</span>';
+	});
+}
+
+function stripJargon(data) {
+	for (var key in data) {
+		if (key === 'M') {
+			for (var subKey in data[key]) {
+				data[subKey] = data[key][subKey];
+			}
+			delete data[key];
+		} else if (key === 'S') {
+			data = data[key];
+		} else if (key === 'N') {
+			data = data[key];
+		}
+	}
+
+	// Flatten Object now
+	for (var key in data) {
+		if (data[key] instanceof Object) {
+			for (var subKey in data[key]) {
+				if (subKey === 'S' || subKey === 'N') {
+					data[key] = data[key][subKey];
+				} else if (subKey === 'M') {
+					data[key] = stripJargon(data[key]);
+				} else if (subKey === 'L') {
+					data[key] = data[key][subKey];
+					for (var i = 0; i < data[key].length; i++) {
+						if (data[key][i] instanceof Object) {
+							data[key][i] = stripJargon(data[key][i]);
+						}
+					}
+				}
+			}
+		}
+	}
+	return data;
 }
